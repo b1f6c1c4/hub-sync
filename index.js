@@ -1,6 +1,7 @@
 const os = require('os');
 const path = require('path');
 const fs = require('fs');
+const yargRoot = require('yargs');
 const debug = require('debug')('hub-sync');
 const HubSync = require('./sync');
 
@@ -52,7 +53,7 @@ const runUpdate = async ({ what, from, force, dryRun }, token) => {
   debug(res);
 }
 
-require('yargs')
+module.exports = yargRoot
   .option('token-file', {
     describe: 'Github token file, see https://github.com/settings/tokens',
     default: path.join(os.homedir(), '.hub-sync'),
@@ -97,4 +98,4 @@ require('yargs')
     });
   })
   .help()
-  .parse();
+  .parse;

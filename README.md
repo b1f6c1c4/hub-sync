@@ -33,7 +33,7 @@ http PATCH https://api.github.com/repos/<you>/<repo>/git/refs/heads/master "Auth
 Now `hub-sync` does this for you:
 ```sh
 # This can be ran everywhere; it works without git.
-hub-sync [<you>/]<repo>[/<branch>] [<other>[/<repo>[/<branch>]]] [--force]
+hub-sync <you>/<repo>/<branch> <other>/<repo>/<branch> [--force]
 ```
 
 ## Installation
@@ -43,7 +43,27 @@ $ npm install --global hub-sync
 ```
 ## Usage
 
-TODO
+```
+hub-sync.js <what> [<from>]
+
+Update github repo
+
+Commands:
+  hub-sync.js update <what> [<from>]  Update github repo               [default]
+
+Positionals:
+  what  [[<you>/]]<repo>[/<branch>] Which repo to update.               [string]
+  from  <other>[/<repo>[/<branch>]] The upstream repo.                  [string]
+
+Options:
+  --version      Show version number                                   [boolean]
+  --token-file   Github token file, see https://github.com/settings/tokens
+                                               [string] [default: "~/.hub-sync"]
+  -t, --token    Github token, see https://github.com/settings/tokens   [string]
+  --help         Show help                                             [boolean]
+  -f, --force    As if `git push --force`                              [boolean]
+  -n, --dry-run  Don't actually update                                 [boolean]
+```
 
 ## License
 
