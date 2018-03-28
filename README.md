@@ -1,7 +1,7 @@
-# hub-sync
+# @b1f6c1c4/hub-sync
 
-[![npm](https://img.shields.io/npm/v/hub-sync.svg?style=flat-square)](https://www.npmjs.com/package/hub-sync)
-[![npm](https://img.shields.io/npm/dt/hub-sync.svg?style=flat-square)](https://www.npmjs.com/package/hub-sync)
+[![npm](https://img.shields.io/npm/v/@b1f6c1c4/hub-sync.svg?style=flat-square)](https://www.npmjs.com/package/@b1f6c1c4/hub-sync)
+[![npm](https://img.shields.io/npm/dt/@b1f6c1c4/hub-sync.svg?style=flat-square)](https://www.npmjs.com/package/@b1f6c1c4/hub-sync)
 [![GitHub last commit](https://img.shields.io/github/last-commit/b1f6c1c4/hub-sync.svg?style=flat-square)](https://github.com/b1f6c1c4/hub-sync)
 [![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/b1f6c1c4/hub-sync.svg?style=flat-square)](https://github.com/b1f6c1c4/hub-sync)
 [![license](https://img.shields.io/github/license/b1f6c1c4/hub-sync.svg?style=flat-square)](https://github.com/b1f6c1c4/hub-sync/blob/master/LICENSE.md)
@@ -39,7 +39,7 @@ hub-sync <you>/<repo>/<branch> <other>/<repo>/<branch> [--force]
 ## Installation
 
 ```sh
-$ npm install --global hub-sync
+$ npm install --global @b1f6c1c4/hub-sync
 ```
 ## Usage
 
