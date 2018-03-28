@@ -61,20 +61,25 @@ class HubSync {
     return data.login;
   }
 
-  async update({ user, repo, branch }, from, force) {
+  async fill({ what: { user, repo, branch }, from, force }) {
     user = user || await this.getMe();
-    if (!from || !branch) {
+    if (!from.user || !branch) {
       const { default_branch, parent } = await this.getRepo({ user, repo });
       branch = branch || default_branch;
-      from = from || {
-        user: parent.owner.login,
-        repo: parent.name,
-      };
+      if (!from.user) {
+        from = {
+          user: parent.owner.login,
+          repo: parent.name,
+        };
+      }
     }
     from.repo = from.repo || repo;
     from.branch = from.branch || branch;
-    const sha = await this.getRefs(from);
-    return this.setRefs({ user, repo, branch }, sha, force);
+    return {
+      what: { user, repo, branch },
+      from,
+      force,
+    };
   }
 }
 
