@@ -8,6 +8,23 @@
 
 > Sync your github forks without git.
 
+## TL;DR
+
+```sh
+npm i -g @b1f6c1c4/hub-sync
+# Generate a token **with public_repo scope** at https://github.com/settings/tokens
+echo the-token > ~/.hub-sync
+# Update your webpack fork default branch to the latest of upstream:
+hub-sync webpack
+# Update your material-ui fork default branch to the latest of upstream:
+hub-sync material-ui
+# Update your material-ui fork master branch to the latest of upstream:
+hub-sync material-ui/master
+# Update your antediluvian io.js fork to the latest nodejs:
+hub-sync io.js # name doesn't need to match exactly
+hub-sync io.js nodejs/node # but you MUST specify the repo if you want to sync to the upstream of upstream
+```
+
 ## Why
 
 To keep your github fork up-to-date, the [old-fashioned way](https://help.github.com/articles/syncing-a-fork/) is:
