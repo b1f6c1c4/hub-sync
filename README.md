@@ -6,7 +6,7 @@
 [![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/b1f6c1c4/hub-sync.svg?style=flat-square)](https://github.com/b1f6c1c4/hub-sync)
 [![license](https://img.shields.io/github/license/b1f6c1c4/hub-sync.svg?style=flat-square)](https://github.com/b1f6c1c4/hub-sync/blob/master/LICENSE.md)
 
-> Sync your github forks without git.
+> Sync your github forks without git in O(1) time, space, and network BW.
 
 ## TL;DR
 
@@ -23,7 +23,20 @@ hub-sync material-ui/master
 # Update your antediluvian io.js fork to the latest nodejs:
 hub-sync io.js # name doesn't need to match exactly
 hub-sync io.js nodejs/node # but you MUST specify the repo if you want to sync to the upstream of upstream
+# Create a new branch
+hub-sync -c ... ...
+# Do it even if not fast-forward (EXTREMELY DANGEROUS)
+hub-sync -f ... ...
+# Delete a branch (EXTREMELY EXTREMELY DANGEROUS)
+hub-sync --delete ... ...
 ```
+
+## Important notice
+
+There is **NO SAFETY NET** at all for `-f|--force` and `-d|--delete`.
+**YOU MAY LOSE ALL YOUR DATA IMMEDIATELY** if not used properly.
+Neither Github nor the author of `hub-sync` will be responsible for your loss.
+USE AT YOUR OWN RISK. REFER TO THE LICENSE FOR LEGAL ISSUE.
 
 ## Why
 
@@ -37,7 +50,8 @@ git push origin upstream/master<master>
 cd ..
 rm -rf <repo>.git
 ```
-However, this is totally pointless since you actually download all the data from github.com and upload all the way back. (I know git is smart enough to upload only what github.com already has, but you have to download everything first.)
+However, this is totally pointless since you actually download all the data from github.com and upload all the way back. (I know git may be smart enough to upload only what github.com already has, but you have to download everything first.)
+This approach takes **as bad as O(n) time, O(n) space, O(n) network bandwidth**.
 
 So the solution is to call Github API directly:
 ```sh
@@ -45,12 +59,14 @@ So the solution is to call Github API directly:
 http GET https://api.github.com/repos/<other>/<repo>/git/refs/heads/master
 # Find object.sha, and
 http PATCH https://api.github.com/repos/<you>/<repo>/git/refs/heads/master "Authorization<token> ..." sha=...
+# If branch non-exist, use the following instead
+http POST https://api.github.com/repos/<you>/<repo>/git/refs "Authorization<token> ..." sha=...
 ```
 
-Now `hub-sync` does this for you:
+Now `hub-sync` does this for you, **as smooth as O(1)**:
 ```sh
 # This can be ran everywhere; it works without git.
-hub-sync <you>/<repo>/<branch> <other>/<repo>/<branch> [--force]
+hub-sync [-f|-c|-d] <you>/<repo>/<branch> <other>/<repo>/<branch>
 ```
 
 ## Installation
@@ -66,10 +82,10 @@ hub-sync.js <what> [<from>]
 Update github repo
 
 Commands:
-  hub-sync.js update <what> [<from>]  Update github repo               [default]
+  hub-sync.js modify <what> [<from>]  Modify github repo               [default]
 
 Positionals:
-  what  [[<you>/]]<repo>[/<branch>] Which repo to update.               [string]
+  what  [[<you>/]]<repo>[/<branch>] Which repo to modify.               [string]
   from  <other>[/<repo>[/<branch>]] The upstream repo.                  [string]
 
 Options:
@@ -77,8 +93,10 @@ Options:
   --token-file   Github token file, see https://github.com/settings/tokens
                                                [string] [default: "~/.hub-sync"]
   -t, --token    Github token, see https://github.com/settings/tokens   [string]
+  -c, --create   Create a reference, instead of update                 [boolean]
+  -d, --delete   Delete a reference, instead of update (dangerous)     [boolean]
   --help         Show help                                             [boolean]
-  -f, --force    As if `git push --force`                              [boolean]
+  -f, --force    As if `git push --force` (dangerous)                  [boolean]
   -n, --dry-run  Don't actually update                                 [boolean]
 ```
 

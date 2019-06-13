@@ -34,23 +34,39 @@ const parseSpec = (spec = '', omitUser = false) => {
 
 const show = ({ user, repo, branch }) => `https://github.com/${user}/${repo}/tree/${branch}`;
 
-const runUpdate = async ({ what, from, force, dryRun }, token) => {
-  debug({ what, from, force, dryRun });
+const runUpdate = async ({ what, from, force, create, delete: del, dryRun }, token) => {
+  debug({ what, from, force, create, dryRun });
   what = parseSpec(what, true);
   from = parseSpec(from);
   debug({ what, from });
   const hs = new HubSync({ token });
   const cfg = await hs.fill({ what, from, force })
-  console.log(`Will update ${show(cfg.what)} <- ${show(cfg.from)} (force: ${force})`);
-  const sha = await hs.getRefs(cfg.from);
-  console.log(`Got head sha: ${sha}`);
+  if (create) {
+    console.log(`Will create ${show(cfg.what)} <- ${show(cfg.from)} (force: ${force})`);
+  } else if (del) {
+    console.log(`Will delete ${show(cfg.what)}`);
+  } else {
+    console.log(`Will update ${show(cfg.what)} <- ${show(cfg.from)} (force: ${force})`);
+  }
+  const sha = await hs.getRefs(del ? cfg.what : cfg.from);
+  if (del) {
+    console.log(`Got origin head sha: ${sha}`);
+  } else {
+    console.log(`Got upstream head sha: ${sha}`);
+  }
   if (dryRun) {
     console.log('Stopped because --dry-run');
     return;
   }
-  const res = await hs.setRefs(cfg.what, sha, force);
-  console.log(`Succeed, ${show(cfg.what)} is at ${res.object.sha}`);
-  debug(res);
+  if (del) {
+    const res = await hs.delRefs(cfg.what);
+    console.log(`Succeed, ${show(cfg.what)} is deleted`);
+    debug(res);
+  } else {
+    const res = await hs.setRefs(cfg.what, sha, { force, create });
+    console.log(`Succeed, ${show(cfg.what)} is at ${res.object.sha}`);
+    debug(res);
+  }
 }
 
 module.exports = yargRoot
@@ -64,20 +80,33 @@ module.exports = yargRoot
     describe: 'Github token, see https://github.com/settings/tokens',
     type: 'string',
   })
-  .command(['update <what> [<from>]', '$0'], 'Update github repo', (yargs) => {
+  .command(['modify <what> [<from>]', '$0'], 'Modify github repo', (yargs) => {
     yargs
       .option('f', {
         alias: 'force',
-        describe: 'As if `git push --force`',
+        describe: 'As if `git push --force` (dangerous)',
         type: 'boolean',
       })
+      .option('c', {
+        alias: 'create',
+        describe: 'Create a reference, instead of update',
+        type: 'boolean',
+      })
+      .option('d', {
+        alias: 'delete',
+        describe: 'Delete a reference, instead of update (dangerous)',
+        type: 'boolean',
+      })
+      .conflicts('c', 'f')
+      .conflicts('c', 'd')
+      .conflicts('d', 'f')
       .option('n', {
         alias: 'dry-run',
         describe: 'Don\'t actually update',
         type: 'boolean',
       })
       .positional('what', {
-        describe: '[[<you>/]]<repo>[/<branch>] Which repo to update.',
+        describe: '[[<you>/]]<repo>[/<branch>] Which repo to modify.',
         type: 'string',
         demandCommand: true,
       })

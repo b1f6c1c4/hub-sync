@@ -33,7 +33,18 @@ class HubSync {
     return data.object.sha;
   }
 
-  async setRefs({ user, repo, branch }, sha, force) {
+  async setRefs({ user, repo, branch }, sha, { force, create }) {
+    if (create) {
+      const { data } = await this.run({
+        method: 'post',
+        url: `/repos/${user}/${repo}/git/refs`,
+        data: {
+          ref: `refs/heads/${branch}`,
+          sha,
+        },
+      });
+      return data;
+    }
     const { data } = await this.run({
       method: 'patch',
       url: `/repos/${user}/${repo}/git/refs/heads/${branch}`,
@@ -43,6 +54,14 @@ class HubSync {
       },
     });
     return data;
+  }
+
+  async delRefs({ user, repo, branch }) {
+    const { data } = await this.run({
+      method: 'delete',
+      url: `/repos/${user}/${repo}/git/refs/heads/${branch}`,
+    });
+    return true;
   }
 
   async getRepo({ user, repo }) {
