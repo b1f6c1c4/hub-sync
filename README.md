@@ -69,6 +69,16 @@ Now `hub-sync` does this for you, **as smooth as O(1)**:
 hub-sync [-f|-c|-d] <you>/<repo>/<branch> <other>/<repo>/<branch>
 ```
 
+## Wanna take more control over the process, but not to clone everything?
+
+You will need [`git-get`](https://github.com/b1f6c1c4/git-get) and [`git-fancy-push`](https://github.com/b1f6c1c4/git-fancy-push).
+The latter one resolved the long-standing "shallow update not allowed" problem.
+```bash
+git get -g <you>/<repo>
+git remote add upstream ...
+git fancy-push upstream origin/master:master
+```
+
 ## Installation
 
 ```sh
