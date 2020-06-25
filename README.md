@@ -10,15 +10,17 @@
 
 ## Basic usage
 
-1. Before you proceed, you need a [GitHub Personal Accses Token](https://github.com/settings/tokens).
+1. Before you proceed, you need to generate a [GitHub Personal Accses Token](https://github.com/settings/tokens).
+
     - In the *Select scopes* section, you have to select **public_repo** to be update your forks.
-1. Install the package with *npm* ([nodejs package manager](https://nodejs.org/):
+
+1. Install the package with *npm* ([nodejs package manager](https://nodejs.org/)).
 
     ```bash
     npm i -g @b1f6c1c4/hub-sync
     ```
 
-1. Update your fork *instantly*:
+1. Update your fork *instantly*. You will be asked to type the [GitHub Personal Access Token](https://github.com/settings/tokens) you've just generated.
 
     ```bash
     hub-sync <name-of-your-fork>
