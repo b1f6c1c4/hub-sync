@@ -39,6 +39,11 @@ const readToken = async ({ token, tokenFile }) => {
       console.error(chalk`{magenta Token recieved, trying to save to} {yellow ${tokenFile}}`);
       await fs.promises.writeFile(tokenFile, res, 'utf-8');
       console.error(chalk`{green Token saved to} {yellow ${tokenFile}} successfully`);
+      try {
+        await fs.promises.chmod(tokenFile, 0o600);
+      } catch (e) {
+        console.error(chalk`{red Cannot change the mode of} {yello ${tokenFile}} {red to 0600. You need to sure the security of the file by yourself.}`);
+      }
     }
     return (await fs.promises.readFile(tokenFile, 'utf-8')).trim();
   } catch (e) {

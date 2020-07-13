@@ -10,20 +10,18 @@
 
 ## Basic usage
 
-1. Before you proceed, you need to generate a [GitHub Personal Accses Token](https://github.com/settings/tokens).
-
-    - In the *Select scopes* section, you have to select **public_repo** to be update your forks.
-
 1. Install the package with *npm* ([nodejs package manager](https://nodejs.org/)).
 
     ```bash
     npm i -g @b1f6c1c4/hub-sync
     ```
 
-1. Update your fork *instantly*. You will be asked to type the [GitHub Personal Access Token](https://github.com/settings/tokens) you've just generated.
+1. Update your fork *instantly*.
+For the first time you run this, you will be asked to generate a [GitHub Personal Access Token](https://github.com/settings/tokens).
+Follow the instructions carefully and **keep your token CONFIDENTIAL.**
 
     ```bash
-    hub-sync <name-of-your-fork>
+    hub-sync <name-of-your-fork-repository>
     ```
 
 ## Advanced usage
@@ -50,6 +48,12 @@
 
     ```bash
     hub-sync <your-repo>/<branch> <another-user>/<repo>/<branch>
+    ```
+
+1. Point a branch of your repo to a specific SHA-1: (rarely used)
+
+    ```bash
+    hub-sync <your-repo>/<branch> <sha-1>
     ```
 
 1. Create a new branch
