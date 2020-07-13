@@ -26,7 +26,7 @@ const readToken = async ({ token, tokenFile }) => {
       console.error(chalk`3. Type "{cyan hub-sync}" in the {yellow {italic Note}} input box.`);
       console.error(chalk`4. In the {yellow {italic Select scopes}} section, locate {yellow {italic repo}} subsection and select "{green public_repo}".`);
       console.error(chalk`5. Click the {green {italic Generate token}} button at the very bottom of the page.`);
-      console.error(chalk`{red Notice: Keep you Personal Access Token} {red {bold ABSOLUTELY CONFIDENTIAL}}.`);
+      console.error(chalk`{red {bold Notice: Keep you Personal Access Token ABSOLUTELY CONFIDENTIAL}}.`);
       console.error(chalk`6. Copy-paste the token here:`);
       console.error(chalk`(your token will be saved to {yellow ${tokenFile}}, so you don't need to generate token every time you update your fork.)`);
       const res = await new Promise((resolve) => {
@@ -50,15 +50,21 @@ const readToken = async ({ token, tokenFile }) => {
   }
 }
 
-const parseSpec = (spec = '', omitUser = false) => {
+const parseSpec = (spec, dest) => {
+  if (!dest && /^[0-9a-f]{40}$/.test(spec)) {
+    return { sha1: spec };
+  }
+  if (!spec) {
+    return {};
+  }
   const sp = spec === '' ? [] : spec.split('/', 3);
   switch (sp.length) {
     case 0:
       return {};
     case 1:
-      return omitUser ? { repo: sp[0] } : { user: sp[0] };
+      return dest ? { repo: sp[0] } : { user: sp[0] };
     case 2:
-      return omitUser ? { repo: sp[0], branch: sp[1] } : { user: sp[0], repo: sp[1] };
+      return dest ? { repo: sp[0], branch: sp[1] } : { user: sp[0], repo: sp[1] };
     default:
       return { user: sp[0], repo: sp[1], branch: sp[2] };
   }
@@ -69,34 +75,45 @@ const show = ({ user, repo, branch }) => `https://github.com/${user}/${repo}/tre
 const runUpdate = async ({ what, from, force, create, delete: del, dryRun }, token) => {
   debug({ what, from, force, create, dryRun });
   what = parseSpec(what, true);
-  from = parseSpec(from);
+  from = parseSpec(from, false);
   debug({ what, from });
   const hs = new HubSync({ token });
   const cfg = await hs.fill({ what, from, force })
-  const forceful = force ? chalk`{red {bold FORCED}}` : chalk`{dim (fast forward only)}`;
   if (create) {
-    console.error(chalk`{green Will create ${show(cfg.what)}} ${forceful}`);
-    console.error(chalk`{magenta ^ from upstream ${show(cfg.from)}}`);
+    console.error(chalk`{green Will create ${show(cfg.what)}}`);
   } else if (del) {
     console.error(chalk`{red Will delete ${show(cfg.what)}}`);
   } else {
+    const forceful = force ? chalk`{red {bold FORCED}}` : chalk`{dim (fast forward only)}`;
     console.error(chalk`{cyan Will update ${show(cfg.what)}} ${forceful}`);
-    console.error(chalk`{magenta ^ from upstream ${show(cfg.from)}}`);
+  }
+  if (!del) {
+    if (cfg.from.sha1) {
+      console.error(chalk`{magenta ^ from SHA-1 ${cfg.from.sha1}}`);
+    } else {
+      console.error(chalk`{magenta ^ from upstream ${show(cfg.from)}}`);
+    }
   }
   try {
-    const old = await hs.getRefs(cfg.what);
-    const sha = !del && await hs.getRefs(cfg.from);
-    if (del) {
+    const old = !create && await hs.getRefs(cfg.what);
+    const sha = !del && (cfg.from.sha1 || await hs.getRefs(cfg.from));
+    if (create) {
+      console.error(chalk`Got upstream head SHA-1: {yellow ${sha}}`);
+    } else if (del) {
       console.error(chalk`Got origin head SHA-1: {yellow ${old}}`);
     } else {
       console.error(chalk`Got origin head SHA-1: {yellow ${old}}`);
-      console.error(chalk`Got upstream head SHA-1: {yellow ${sha}}`);
+      if (cfg.from.sha1) {
+        console.error(chalk`Use the specified SHA-1: {yellow ${sha}}`);
+      } else {
+        console.error(chalk`Got upstream head SHA-1: {yellow ${sha}}`);
+      }
       if (old === sha) {
         console.error(chalk`{greenBright Skipped:} {yellow ${show(cfg.what)}} is already in sync.`);
         return true;
       }
     }
-    if (!create && force) {
+    if (force) {
       console.error(chalk`{magenta This is a dangerous operation that {bold may lead to data loss}.}`);
       console.error(chalk`{magenta If you do experience data loss and you want to recover, run this first:}`);
       console.error(chalk`{magenta {bold >} hub-sync -c ${cfg.what.user}/${cfg.what.repo}/hub-sync-recovery-${cfg.what.branch} ${old}}`);
@@ -207,10 +224,14 @@ module.exports = yargRoot
         demandCommand: true,
       })
       .positional('from', {
-        describe: '<other>[/<repo>[/<branch>]] The upstream repo.',
+        describe: '<other>[/<repo>[/<branch>]] The upstream repo. | <sha1>',
         type: 'string',
       });
   }, async (argv) => {
+    if (argv.delete && argv.from) {
+      console.error(chalk`{red You cannot specify both --delete and <from>.}`);
+      process.exit(1);
+    }
     const token = await readToken(argv);
     if (!token) {
       process.exit(2);
@@ -222,8 +243,13 @@ module.exports = yargRoot
         process.exit(1);
       }
     } catch (e) {
-      console.error(chalk`{red Unknown error occured. Please report the following information to the developer.}`);
-      console.error(chalk`{yellow Where to report bug: {underline https://github.com/b1f6c1c4/hub-sync}}`);
+      if (e.response && e.response.data && e.response.data.message) {
+        console.error(chalk`{red Unknown error occured:} {redBright {italic ${e.response.data.message}}}`);
+      } else {
+        console.error(chalk`{red Unknown error occured:} {redBright {italic ${e.message}}}`);
+      }
+      console.error(chalk`{yellow Please report the bug, including the info below, to the developer.}`);
+      console.error(chalk`{yellow Where to report: {underline https://github.com/b1f6c1c4/hub-sync}}`);
       console.error(chalk`{yellow Error details:}`);
       console.error(chalk.dim(e.stack));
       if (e.response) {
