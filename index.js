@@ -1,19 +1,51 @@
 const os = require('os');
 const path = require('path');
 const fs = require('fs');
+const chalk = require('chalk');
 const yargRoot = require('yargs');
 const debug = require('debug')('hub-sync');
 const HubSync = require('./sync');
+const readline = require('readline');
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stderr
+});
 
-const readToken = ({ token, tokenFile }) => {
+const readToken = async ({ token, tokenFile }) => {
   if (token) {
     return token;
   }
   try {
-    return fs.readFileSync(tokenFile, 'utf-8').trim();
+    try {
+      await fs.promises.access(tokenFile, fs.constants.R_OK);
+    } catch {
+      console.error(chalk`{magenta hub-sync needs a {bold GitHub Personal Access Token} to update your GitHub repo fork.}`);
+      console.error(chalk`Please visit {underline https://github.com/settings/tokens} and follow the instructions:`);
+      console.error(chalk`1. {italic If asked}, type your GitHub account password`);
+      console.error(chalk`2. Click the {green {italic Generate new token}} button.`);
+      console.error(chalk`3. Type "{cyan hub-sync}" in the {yellow {italic Note}} input box.`);
+      console.error(chalk`4. In the {yellow {italic Select scopes}} section, locate {yellow {italic repo}} subsection and select "{green public_repo}".`);
+      console.error(chalk`5. Click the {green {italic Generate token}} button at the very bottom of the page.`);
+      console.error(chalk`{red Notice: Keep you Personal Access Token} {red {bold ABSOLUTELY CONFIDENTIAL}}.`);
+      console.error(chalk`6. Copy-paste the token here:`);
+      console.error(chalk`(your token will be saved to {yellow ${tokenFile}}, so you don't need to generate token every time you update your fork.)`);
+      const res = await new Promise((resolve) => {
+        rl.question('Your token: ', (input) => { resolve(input.trim()); } );
+      });
+      if (!/^[0-9a-f]{40}$/.test(res)) {
+        console.error(chalk`{red It doesn't look like a valid token. Give up.}`);
+        return undefined;
+      }
+      console.error(chalk`{magenta Token recieved, trying to save to} {yellow ${tokenFile}}`);
+      await fs.promises.writeFile(tokenFile, res, 'utf-8');
+      console.error(chalk`{green Token saved to} {yellow ${tokenFile}} successfully`);
+    }
+    return (await fs.promises.readFile(tokenFile, 'utf-8')).trim();
   } catch (e) {
-    console.error(`Error occured during reading token file ${tokenFile}.`);
+    console.error(chalk`{red Error occured when accessing token file} {yellow ${tokenFile}}.`);
     console.error('Please check its existance and permission.');
+    console.error('Also make sure if the folder it belongs to actually exist.');
+    console.error(chalk.dim(e.stack));
     return undefined;
   }
 }
@@ -114,17 +146,27 @@ module.exports = yargRoot
         describe: '<other>[/<repo>[/<branch>]] The upstream repo.',
         type: 'string',
       });
-  }, (argv) => {
-    const token = readToken(argv);
+  }, async (argv) => {
+    const token = await readToken(argv);
     if (!token) {
-      return;
+      process.exit(2);
     }
-    runUpdate(argv, token).catch((e) => {
-      console.error(e.message);
-      if (e.response) {
-        console.error(e.response.data);
+    try {
+      if (await runUpdate(argv, token)) {
+        process.exit(0);
+      } else {
+        process.exit(1);
       }
-    });
+    } catch (e) {
+      console.error(chalk`{red Unknown error occured. Please report the following information to the developer.}`);
+      console.error(chalk`{yellow Where to report bug: {underline https://github.com/b1f6c1c4/hub-sync}}`);
+      console.error(chalk`{yellow Error details:}`);
+      console.error(chalk.dim(e.stack));
+      if (e.response) {
+        console.error(chalk.dim(JSON.stringify(e.response.data)));
+      }
+    };
+    process.exit(1);
   })
   .help()
   .parse;
