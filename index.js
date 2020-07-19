@@ -42,7 +42,7 @@ const readToken = async ({ token, tokenFile }) => {
       try {
         await fs.promises.chmod(tokenFile, 0o600);
       } catch (e) {
-        console.error(chalk`{red Cannot change the mode of} {yello ${tokenFile}} {red to 0600. You need to sure the security of the file by yourself.}`);
+        console.error(chalk`{red Cannot change the mode of} {yellow ${tokenFile}} {red to 0600. You need to sure the security of the file by yourself.}`);
       }
     }
     return (await fs.promises.readFile(tokenFile, 'utf-8')).trim();
