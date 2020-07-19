@@ -62,13 +62,13 @@ Follow the instructions carefully and **keep your token CONFIDENTIAL.**
     hub-sync -c ... ...
     ```
 
-1. Update even if not fast-forward **(EXTREMELY DANGEROUS)**
+1. Update even if not fast-forward: **(EXTREMELY DANGEROUS)**
 
     ```bash
     hub-sync -f ... ...
     ```
 
-1. Delete a branch **(EXTREMELY EXTREMELY DANGEROUS)**
+1. Delete a branch: **(EXTREMELY EXTREMELY DANGEROUS)**
 
     ```bash
     hub-sync --delete ... ...
