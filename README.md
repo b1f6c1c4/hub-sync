@@ -56,7 +56,7 @@ Follow the instructions carefully and **keep your token CONFIDENTIAL.**
     hub-sync <your-repo>/<branch> <sha-1>
     ```
 
-1. Create a new branch
+1. Create a new branch:
 
     ```bash
     hub-sync -c ... ...
