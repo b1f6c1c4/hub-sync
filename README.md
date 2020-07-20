@@ -8,37 +8,80 @@
 
 > Sync your github forks without git in O(1) time, space, and network BW.
 
-## TL;DR
+## Basic usage
 
-```sh
-npm i -g @b1f6c1c4/hub-sync
-# Generate a token **with public_repo scope** at https://github.com/settings/tokens
-echo the-token > ~/.hub-sync
-# Update your webpack fork default branch to the latest of upstream:
-hub-sync webpack
-# Update your material-ui fork default branch to the latest of upstream:
-hub-sync material-ui
-# Update your material-ui fork master branch to the latest of upstream:
-hub-sync material-ui/master
-# Update your antediluvian io.js fork to the latest nodejs:
-hub-sync io.js # name doesn't need to match exactly
-hub-sync io.js nodejs/node # but you MUST specify the repo if you want to sync to the upstream of upstream
-# Create a new branch
-hub-sync -c ... ...
-# Do it even if not fast-forward (EXTREMELY DANGEROUS)
-hub-sync -f ... ...
-# Delete a branch (EXTREMELY EXTREMELY DANGEROUS)
-hub-sync --delete ... ...
-```
+1. Install the package with *npm* ([nodejs package manager](https://nodejs.org/)).
 
-## Important notice
+    ```bash
+    npm i -g @b1f6c1c4/hub-sync
+    ```
 
-There is **NO SAFETY NET** at all for `-f|--force` and `-d|--delete`.
-**YOU MAY LOSE ALL YOUR DATA IMMEDIATELY** if not used properly.
+1. Update your fork *instantly*.
+For the first time you run this, you will be asked to generate a [GitHub Personal Access Token](https://github.com/settings/tokens).
+Follow the instructions carefully and **keep your token CONFIDENTIAL.**
+
+    ```bash
+    hub-sync <name-of-your-fork-repository>
+    ```
+
+## Advanced usage
+
+1. Update a certain branch:
+
+    ```bash
+    hub-sync <repo>/<branch>
+    ```
+
+1. Update from another user's fork:
+
+    ```bash
+    hub-sync <your-repo> <another-user>
+    ```
+
+1. Update from another user's fork, but with a different name:
+
+    ```bash
+    hub-sync <your-repo> <another-user>/<repo>
+    ```
+
+1. Update from another user's fork, but with a different name and a different branch:
+
+    ```bash
+    hub-sync <your-repo>/<branch> <another-user>/<repo>/<branch>
+    ```
+
+1. Point a branch of your repo to a specific SHA-1: (rarely used)
+
+    ```bash
+    hub-sync <your-repo>/<branch> <sha-1>
+    ```
+
+1. Create a new branch:
+
+    ```bash
+    hub-sync -c <destination> <source>
+    ```
+
+1. Update even if not fast-forward: **(EXTREMELY DANGEROUS)**
+
+    ```bash
+    hub-sync -f <destination> <source>
+    ```
+
+1. Delete a branch: **(EXTREMELY EXTREMELY DANGEROUS)**
+
+    ```bash
+    hub-sync --delete <destination>
+    ```
+
+1. See `hub-sync --help` for the complete usage documentation.
+
+Notice: There is **NO SAFETY NET** at all for `-f|--force` and `-d|--delete`.
+**YOU MAY LOSE ALL YOUR WORK ON THAT BRANCH IMMEDIATELY** if not used properly.
 Neither Github nor the author of `hub-sync` will be responsible for your loss.
 USE AT YOUR OWN RISK. REFER TO THE LICENSE FOR LEGAL ISSUE.
 
-## Why
+## Technical details
 
 To keep your github fork up-to-date, the [old-fashioned way](https://help.github.com/articles/syncing-a-fork/) is:
 ```sh
@@ -69,7 +112,7 @@ Now `hub-sync` does this for you, **as smooth as O(1)**:
 hub-sync [-f|-c|-d] <you>/<repo>/<branch> <other>/<repo>/<branch>
 ```
 
-## Wanna take more control over the process, but not to clone everything?
+### Wanna take more control over the process, but not to clone everything?
 
 You will need [`git-get`](https://github.com/b1f6c1c4/git-get) and [`git-fancy-push`](https://github.com/b1f6c1c4/git-fancy-push).
 The latter one resolved the long-standing "shallow update not allowed" problem.
@@ -77,37 +120,6 @@ The latter one resolved the long-standing "shallow update not allowed" problem.
 git get -g <you>/<repo>
 git remote add upstream ...
 git fancy-push upstream origin/master:master
-```
-
-## Installation
-
-```sh
-$ npm install --global @b1f6c1c4/hub-sync
-```
-## Usage
-
-```
-hub-sync.js <what> [<from>]
-
-Update github repo
-
-Commands:
-  hub-sync.js modify <what> [<from>]  Modify github repo               [default]
-
-Positionals:
-  what  [[<you>/]]<repo>[/<branch>] Which repo to modify.               [string]
-  from  <other>[/<repo>[/<branch>]] The upstream repo.                  [string]
-
-Options:
-  --version      Show version number                                   [boolean]
-  --token-file   Github token file, see https://github.com/settings/tokens
-                                               [string] [default: "~/.hub-sync"]
-  -t, --token    Github token, see https://github.com/settings/tokens   [string]
-  -c, --create   Create a reference, instead of update                 [boolean]
-  -d, --delete   Delete a reference, instead of update (dangerous)     [boolean]
-  --help         Show help                                             [boolean]
-  -f, --force    As if `git push --force` (dangerous)                  [boolean]
-  -n, --dry-run  Don't actually update                                 [boolean]
 ```
 
 ## License
