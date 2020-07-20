@@ -77,7 +77,7 @@ Follow the instructions carefully and **keep your token CONFIDENTIAL.**
 1. See `hub-sync --help` for the complete usage documentation.
 
 Notice: There is **NO SAFETY NET** at all for `-f|--force` and `-d|--delete`.
-**YOU MAY LOSE ALL YOUR DATA IMMEDIATELY** if not used properly.
+**YOU MAY LOSE ALL YOUR WORK ON THAT BRANCH IMMEDIATELY** if not used properly.
 Neither Github nor the author of `hub-sync` will be responsible for your loss.
 USE AT YOUR OWN RISK. REFER TO THE LICENSE FOR LEGAL ISSUE.
 
