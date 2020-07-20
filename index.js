@@ -82,24 +82,24 @@ const runUpdate = async ({ what, from, force, create, delete: del, dryRun }, tok
   what = parseSpec(what, true);
   from = parseSpec(from, false);
   debug({ what, from });
-  const hs = new HubSync({ token });
-  const cfg = await hs.fill({ what, from, force })
-  if (create) {
-    console.error(chalk`{green Will create ${show(cfg.what)}}`);
-  } else if (del) {
-    console.error(chalk`{red Will delete ${show(cfg.what)}}`);
-  } else {
-    const forceful = force ? chalk`{red {bold FORCED}}` : chalk`{dim (fast forward only)}`;
-    console.error(chalk`{cyan Will update ${show(cfg.what)}} ${forceful}`);
-  }
-  if (!del) {
-    if (cfg.from.sha1) {
-      console.error(chalk`{magenta ^ from SHA-1 ${cfg.from.sha1}}`);
-    } else {
-      console.error(chalk`{magenta ^ from upstream ${show(cfg.from)}}`);
-    }
-  }
   try {
+    const hs = new HubSync({ token });
+    const cfg = await hs.fill({ what, from, force })
+    if (create) {
+      console.error(chalk`{green Will create ${show(cfg.what)}}`);
+    } else if (del) {
+      console.error(chalk`{red Will delete ${show(cfg.what)}}`);
+    } else {
+      const forceful = force ? chalk`{red {bold FORCED}}` : chalk`{dim (fast forward only)}`;
+      console.error(chalk`{cyan Will update ${show(cfg.what)}} ${forceful}`);
+    }
+    if (!del) {
+      if (cfg.from.sha1) {
+        console.error(chalk`{magenta ^ from SHA-1 ${cfg.from.sha1}}`);
+      } else {
+        console.error(chalk`{magenta ^ from upstream ${show(cfg.from)}}`);
+      }
+    }
     const old = !create && await hs.getRefs(cfg.what);
     const sha = !del && (cfg.from.sha1 || await hs.getRefs(cfg.from));
     if (create) {
@@ -148,7 +148,7 @@ const runUpdate = async ({ what, from, force, create, delete: del, dryRun }, tok
     if (!e.response.data) throw e;
     if (e.response.data.message === 'Not Found') {
       console.error(chalk`{red Failed: {italic ${e.response.data.message}.}} {dim Possible reasons:}`);
-      console.error(chalk`Case 1. You have not forked this repo yet.`);
+      console.error(chalk`Case 1. You have {yellow not forked} this repo yet.`);
       console.error(chalk`    {dim Solution: Fork it on GitHub if you want. hub-sync takes care of synchronization, not initial forking.}`);
       console.error(chalk`Case 2. You specified {yellow wrong branches} and/or repos.`);
       console.error(chalk`    {dim Solution: Double check the command line and fix the error.}`);
