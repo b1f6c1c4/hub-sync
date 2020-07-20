@@ -59,19 +59,19 @@ Follow the instructions carefully and **keep your token CONFIDENTIAL.**
 1. Create a new branch:
 
     ```bash
-    hub-sync -c ... ...
+    hub-sync -c <destination> <source>
     ```
 
 1. Update even if not fast-forward: **(EXTREMELY DANGEROUS)**
 
     ```bash
-    hub-sync -f ... ...
+    hub-sync -f <destination> <source>
     ```
 
 1. Delete a branch: **(EXTREMELY EXTREMELY DANGEROUS)**
 
     ```bash
-    hub-sync --delete ... ...
+    hub-sync --delete <destination>
     ```
 
 1. See `hub-sync --help` for the complete usage documentation.
